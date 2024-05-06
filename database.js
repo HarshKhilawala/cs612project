@@ -1,8 +1,8 @@
 const { Pool, Client } = require("pg");
 
 const client = new Client({
-  host: process.env.DATABASE_HOST,
-  user: "root",
+  host: "localhost",
+  user: "postgres",
   port: 5432,
   password: "root",
   database: "cs612project",

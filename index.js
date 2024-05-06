@@ -13,6 +13,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
+
 client
   .connect()
   .then(() => {
@@ -46,16 +47,75 @@ function verifyToken(req, res, next) {
   next();
 }
 
-app.get("/", (req, res) => {
-//   client.query("SELECT * FROM cs612project.usermanagement", (err, result) => {
-//     if (err) {
-//       res.status(400).json({ Reason: "Error in DB" });
-//     } else {
-//       res.status(200).json(result.rows);
-//     }
-//   });
 
-  res.send("Home!");
+// GET Requests
+app.get("/", function(req, res){
+});
+
+app.get("/home", function(req, res){
+  
+});
+
+app.get("/login", function(req, res){
+
+});
+
+app.get("/register", function(req, res){
+  
 });
 
 
+
+
+
+// POST Requests
+app.post("/login", (req, res) => {
+  let { email, password } = req.body;
+  console.log(req.body);
+
+  client.query(
+    `SELECT * from ecommerce.users where email = $1`,
+    [email],
+    (err, result) => {
+      if (err) {
+        res.status(400).json({ Reason: "Error in DB" });
+      } else if (result.rows.length === 0) {
+        res.send("User does not exist.");
+      } else {
+        let userData = result.rows[0];
+        bcrypt.compare(password, userData.password).then((result) => {
+          if (result) {
+            console.log("Login Successful!");
+            res
+              .status(200)
+              .json({ status: true, message: "valid user" });
+          } else {
+            console.log("Login Failed! Incorrect Username or password");
+            res.status(401).json({ status: false, message: "invalid user" });
+          }
+        });
+      }
+    }
+  );
+});;
+
+app.post("/register", (req, res) => {
+  let { fullname, email, password } = req.body;
+  console.log(req.body);
+
+  bcrypt.hash(password, 10).then((hashedPassword) => {
+    client.query(
+      `INSERT INTO ecommerce.users(name, email, password) VALUES($1, $2, $3)`,
+      [fullname, email, hashedPassword],
+      (err, result) => {
+        if (err) {
+          res.status(400).json({ Reason: "DB Error" });
+        } else {
+          res
+            .status(200)
+            .json({ Reason: "User Inserted Successfully."});
+        }
+      }
+    );
+  });
+});
